@@ -5,7 +5,7 @@ SCREEN_HEIGHT = 600
 
 def main():
     
-    game = Game(2, 200, 200)
+    game = Game(5, 150, 150)
     game.start_game_loop()
 
 
