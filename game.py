@@ -1,3 +1,4 @@
+import time
 import pygame
 import random
 
@@ -15,7 +16,7 @@ class Game:
         
         pygame.init()
         self.screen = pygame.display.set_mode((self.x_cells*self.cell_size, self.y_cells*self.cell_size))
-        self.current_board: list[int] = self.generate_first_board(50)
+        self.current_board: list[int] = self.generate_first_board(int(self.nr_cells/10))
 
     def start_game_loop(self) -> None:
 
@@ -28,11 +29,24 @@ class Game:
                     self.running = False
                 
             self.screen.fill((0,0,0))
-            #self.screen.blit(self.draw_board(),(0,0))
+            self.screen.blit(self.draw_board(),(0,0))
 
             pygame.display.flip()
+            self.update_board()
 
     def draw_board(self) -> pygame.Surface:
+
+        board = pygame.Surface((self.x_cells*self.cell_size, self.y_cells*self.cell_size))
+        cell = pygame.Surface((self.cell_size, self.cell_size))
+
+        cell.fill((255,255,255))
+
+        for cell_nr in range(0, self.nr_cells):
+            if self.current_board[cell_nr] == 1:
+                board.blit(cell, ((cell_nr%(self.x_cells))*self.cell_size, int(cell_nr / (self.y_cells))*self.cell_size))
+
+        return board        
+
         pass
 
     def update_board(self) -> list[int]:
@@ -80,7 +94,9 @@ class Game:
         
         next_board = []
 
-        for cell in range(0, self.nr_cells):
+        for count in range(0, self.nr_cells):
+            
+            cell = count
             
             next_board.append(0)
 
@@ -94,18 +110,26 @@ class Game:
                 next_board[cell] += 1
                 if(next_board[cell] > 3):
                     continue 
+            if(count + 1 >= self.nr_cells):
+                cell = count - self.nr_cells
             if(board[cell+1] == 1):
                 next_board[cell] += 1
                 if(next_board[cell] > 3):
                     continue 
+            if(count + (self.y_cells-1) >= self.nr_cells):
+                cell = count - self.nr_cells
             if(board[cell+(self.y_cells-1)] == 1):
                 next_board[cell] += 1
                 if(next_board[cell] > 3):
                     continue 
+            if(count + self.y_cells >= self.nr_cells):
+                cell = count - self.nr_cells
             if(board[cell+(self.y_cells)] == 1):
                 next_board[cell] += 1
                 if(next_board[cell] > 3):
                     continue
+            if(count + (self.y_cells+1) >= self.nr_cells):
+                cell = count - self.nr_cells
             if(board[cell+(self.y_cells+1)] == 1):
                 next_board[cell] += 1
 
