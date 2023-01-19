@@ -1,4 +1,5 @@
 import time
+import numpy as np
 import pygame
 import random
 
@@ -13,12 +14,14 @@ class Game:
         self.x_cells: int = x_cells
         self.y_cells: int = y_cells
         self.nr_cells: int = self.x_cells * self.y_cells
-        self.next_board: list[list[int]]
+        self.next_board: np.ndarray = np.zeros(self.nr_cells, dtype=int)
+        self.living_cells: np.ndarray = np.random.randint(0, self.nr_cells, int(self.nr_cells/10))
+        self.dying_cells: np.ndarray = np.empty(0, dtype=int)
         self.running: bool = True
         
         pygame.init()
         self.screen = pygame.display.set_mode((self.x_cells*self.cell_size, self.y_cells*self.cell_size))
-        self.current_board: list[int] = self.generate_first_board(int(self.nr_cells/10))
+        self.current_board: np.ndarray = self.generate_first_board(int(self.nr_cells/10))
 
         print(f"Game init took {(time.time_ns() - before_time)/1000000} ms")
 
@@ -76,7 +79,7 @@ class Game:
 
         pass
 
-    def update_board(self) -> list[int]:
+    def update_board(self) -> np.ndarray:
         """
         Rules:
         1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
@@ -98,31 +101,27 @@ class Game:
 
         return board
 
-    def generate_first_board(self, nr_starting_cells: int) -> list[int]: 
+    def generate_first_board(self, nr_starting_cells: int) -> np.ndarray: 
         
-        starting_cells = []
-        starting_board = []
+        starting_cells = np.zeros(nr_starting_cells, dtype=int)
+        starting_board = np.zeros(self.nr_cells, dtype=int)
 
         # Generate random starting cells
         for i in range(0, nr_starting_cells):
-            starting_cells.append(random.randint(0, self.nr_cells))
+            starting_cells[i] = np.random.randint(0, self.nr_cells)
 
         # Set starting cells to 1 and the rest to 0
-        for cell in range(0, self.nr_cells):
-            if cell in starting_cells:
-                starting_board.append(1)
-            else:
-                starting_board.append(0)
+        for cell in range(0, nr_starting_cells):
+            starting_board[starting_cells[cell]] = 1
         
         return starting_board
 
 
-    def calculate_neighbors(self,board: list[int]) -> list[int]:
+    def calculate_neighbors(self,board: np.ndarray) -> np.ndarray:
         
-        next_board = []
+        next_board = np.zeros(self.nr_cells, dtype=int)
 
         for count in range(0, self.nr_cells):
-            next_board.append(0)
             cell = count
 
             top_left,top,top_right,left,right,bottom_left,bottom, bottom_right = self.calculate_neighbor_positions(cell)
